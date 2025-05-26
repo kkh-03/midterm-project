@@ -1,3 +1,5 @@
+import java.io.Serializable;
+import java.time.LocalTime;
 import java.util.Scanner;
 
 public class TimeTableManager {
@@ -15,6 +17,29 @@ public class TimeTableManager {
             int choice = scanner.nextInt();
             scanner.nextLine(); // 엔터 제거
             // 이 부분은 추후 switch문으로 채워 넣기
+            class Lecture implements Serializable {
+                String subject;         // 과목명
+                String day;             // 요일 (예: MON, TUE)
+                LocalTime startTime;    // 시작 시간 (HH:mm)
+                LocalTime endTime;      // 종료 시간
+                String room;            // 강의실
+
+                // 생성자
+                public Lecture(String subject, String day, LocalTime startTime, LocalTime endTime, String room) {
+                    this.subject = subject;
+                    this.day = day;
+                    this.startTime = startTime;
+                    this.endTime = endTime;
+                    this.room = room;
+                }
+
+                // 출력용 메서드
+                @Override
+                public String toString() {
+                    return day + " | " + subject + " | " + startTime + " ~ " + endTime + " | " + room;
+                }
+            }
+        }
         }
     }
 }
