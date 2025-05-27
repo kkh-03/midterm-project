@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.Scanner;
+import java.utill.*;
 
 public class TimeTableManager {
     public static void main(String[] args) {
@@ -38,7 +39,19 @@ public class TimeTableManager {
                 public String toString() {
                     return day + " | " + subject + " | " + startTime + " ~ " + endTime + " | " + room;
                 }
+                class TimeTable {
+                    // 수업 목록 저장할 리스트
+                    List<Lecture> lectures = new ArrayList<>();
+
+                    // 수업 추가 메서드 (겹침 확인은 Day 4에서 추가)
+                    public boolean addLecture(Lecture newLecture) {
+                        // 일단 무조건 추가 (내일 시간 충돌 체크 추가 예정)
+                        lectures.add(newLecture);
+                        return true;
+                    }
+                }
             }
+
         }
         }
     }
