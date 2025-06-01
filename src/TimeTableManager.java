@@ -52,6 +52,18 @@ public class TimeTableManager {
                 System.out.println(l);
             }
         }
+        public void searchLecture(String keyword) {
+            boolean found = false;
+            for (Lecture l : lectures) {
+                if (l.subject.toLowerCase().contains(keyword.toLowerCase())) {
+                    System.out.println(l);
+                    found = true;
+                }
+            }
+            if (!found) {
+                System.out.println("🔍 해당 과목을 찾을 수 없습니다.");
+            }
+        }
     }
 
     public static void main(String[] args) {
