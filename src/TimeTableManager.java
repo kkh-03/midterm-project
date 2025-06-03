@@ -48,6 +48,10 @@ public class TimeTableManager {
         }
 
         public void printLectures() {
+            if (lectures.isEmpty()) {
+                System.out.println("⛔등록된 수업이 없습니다.");
+                return;
+            }
             for (Lecture l : lectures) {
                 System.out.println(l);
             }
@@ -63,6 +67,27 @@ public class TimeTableManager {
             if (!found) {
                 System.out.println("🔍 해당 과목을 찾을 수 없습니다.");
             }
+        }
+        public boolean editLecture(String subject, LocalTime newStart, LocalTime newEnd, String newRoom) {
+            for (Lecture lec : lectures) {
+                if (lec.subject.equalsIgnoreCase(subject)) {
+                    Lecture temp = new Lecture(lec.subject, lec.day, newStart, newEnd, newRoom);
+
+                    // 겹침 검사 (본인 제외)
+                    for (Lecture other : lectures) {
+                        if (!other.subject.equalsIgnoreCase(subject) && other.isOverlap(temp)) {
+                            return false;
+                        }
+                    }
+
+                    // 수정
+                    lec.startTime = newStart;
+                    lec.endTime = newEnd;
+                    lec.room = newRoom;
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -100,17 +125,38 @@ public class TimeTableManager {
                     } else {
                         System.out.println("❌ 시간 겹침으로 추가할 수 없습니다.");
                     }
-                    break;
 
-                case 3:
-                    timeTable.printLectures();
-                    break;
+                    case 3 -> timeTable.printLectures();
 
-                case 5:
-                    System.out.println("👋 프로그램을 종료합니다.");
-                    return;
+                    case 6 -> {
+                        System.out.print("검색할 과목명 키워드: ");
+                        String keyword = scanner.nextLine();
+                        timeTable.searchLecture(keyword);
+                    }
 
-                default:
+                    case 7 -> {
+                        System.out.print("수정할 과목명: ");
+                        String subject = scanner.nextLine();
+                        System.out.print("새 시작 시간 (HH:mm): ");
+                        LocalTime newStart = LocalTime.parse(scanner.nextLine());
+                        System.out.print("새 종료 시간 (HH:mm): ");
+                        LocalTime newEnd = LocalTime.parse(scanner.nextLine());
+                        System.out.print("새 강의실: ");
+                        String newRoom = scanner.nextLine();
+
+                        if (timeTable.editLecture(subject, newStart, newEnd, newRoom)) {
+                            System.out.println("✏️ 수업이 수정되었습니다.");
+                        } else {
+                            System.out.println("❌ 수정 실패: 시간 겹침이 있거나 과목을 찾을 수 없습니다.");
+                        }
+                    }
+
+                    case 5 -> {
+                        System.out.println("👋 프로그램을 종료합니다.");
+                        return;
+                    }
+
+                    default -> System.out.println("❌ 잘못된 선택입니다.");
             }
         }
     }
