@@ -45,8 +45,17 @@ public class TimeTableManager {
             return true;
         }
 
-        public boolean removeLecture(String subject) {
-            return lectures.removeIf(l -> l.subject.equalsIgnoreCase(subject));
+        public boolean removeSpecificLecture(String subject, String day, LocalTime startTime, LocalTime endTime) {
+            for (Lecture l : lectures) {
+                if (l.subject.equalsIgnoreCase(subject)
+                        && l.day.equalsIgnoreCase(day)
+                        && l.startTime.equals(startTime)
+                        && l.endTime.equals(endTime)) {
+                    lectures.remove(l);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void printLectures() {
@@ -160,7 +169,14 @@ public class TimeTableManager {
                 case 2: {
                     System.out.print("삭제할 과목명: ");
                     String subject = scanner.nextLine();
-                    if (timeTable.removeLecture(subject)) {
+                    System.out.print("요일(MON, TUE, ...): ");
+                    String day = scanner.nextLine().toUpperCase();
+                    System.out.print("시작 시간 (HH:mm): ");
+                    LocalTime start = LocalTime.parse(scanner.nextLine());
+                    System.out.print("종료 시간 (HH:mm): ");
+                    LocalTime end = LocalTime.parse(scanner.nextLine());
+
+                    if (timeTable.removeSpecificLecture(subject, day, start, end)) {
                         System.out.println("🗑️ 수업이 삭제되었습니다.");
                     } else {
                         System.out.println("❌ 삭제 실패: 해당 과목을 찾을 수 없습니다.");
