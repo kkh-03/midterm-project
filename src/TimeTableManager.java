@@ -63,15 +63,34 @@ public class TimeTableManager {
                 System.out.println("⛔등록된 수업이 없습니다.");
                 return;
             }
-            for (Lecture l : lectures) {
-                System.out.println(l);
-            }
+            System.out.println("📅 정렬된 시간표:");
+            lectures.stream()
+                    .sorted((a, b) -> {
+                        int dayCompare = dayOrder(a.day) - dayOrder(b.day);
+                        return dayCompare != 0 ? dayCompare : a.startTime.compareTo(b.startTime);
+                    })
+                    .forEach(System.out::println);
+        }
+
+        private int dayOrder(String day) {
+            return switch (day.toUpperCase()) {
+                case "MON" -> 1;
+                case "TUE" -> 2;
+                case "WED" -> 3;
+                case "THU" -> 4;
+                case "FRI" -> 5;
+                case "SAT" -> 6;
+                case "SUN" -> 7;
+                default -> 8;
+            };
         }
 
         public void searchLecture(String keyword) {
             boolean found = false;
+            System.out.println("🔍 검색 결과:");
             for (Lecture l : lectures) {
-                if (l.subject.toLowerCase().contains(keyword.toLowerCase())) {
+                if (l.subject.toLowerCase().contains(keyword.toLowerCase()) ||
+                        l.day.equalsIgnoreCase(keyword)) {
                     System.out.println(l);
                     found = true;
                 }
@@ -126,6 +145,7 @@ public class TimeTableManager {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         TimeTable timeTable = new TimeTable();
+        timeTable.loadFromFile("timetable.dat");
 
         while (true) {
             System.out.println("\n--- 시간표 관리 프로그램 ---");
@@ -137,7 +157,7 @@ public class TimeTableManager {
             System.out.println("6. 수업 수정");
             System.out.println("7. 종료");
             System.out.print("선택: ");
-            int choice = -1;
+            int choice;
             try {
                 choice = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
@@ -190,7 +210,7 @@ public class TimeTableManager {
                     timeTable.saveToFile("timetable.dat");
                     break;
                 case 5: {
-                    System.out.print("검색할 과목명 키워드: ");
+                    System.out.print("과목명 또는 요일 검색어 입력: ");
                     String keyword = scanner.nextLine();
                     timeTable.searchLecture(keyword);
                     break;
