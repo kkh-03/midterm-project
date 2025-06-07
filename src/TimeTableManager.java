@@ -96,7 +96,7 @@ public class TimeTableManager {
                 }
             }
             if (!found) {
-                System.out.println("🔍 해당 과목을 찾을 수 없습니다.");
+                System.out.println("❌ 해당 과목을 찾을 수 없습니다.");
             }
         }
 
@@ -140,7 +140,46 @@ public class TimeTableManager {
                 System.out.println("❌ 불러오기 실패: " + e.getMessage());
             }
         }
+        public void printWeeklyTable() {
+            if (lectures.isEmpty()) {
+                System.out.println("⛔ 등록된 수업이 없습니다.");
+                return;
+            }
+
+            String[] days = {"MON", "TUE", "WED", "THU", "FRI"};
+            TreeSet<LocalTime> timeSlots = new TreeSet<>();
+            Map<String, Map<LocalTime, Lecture>> table = new HashMap<>();
+
+            for (String d : days) table.put(d, new HashMap<>());
+
+            for (Lecture lec : lectures) {
+                timeSlots.add(lec.startTime);
+                if (table.containsKey(lec.day.toUpperCase())) {
+                    table.get(lec.day.toUpperCase()).put(lec.startTime, lec);
+                }
+            }
+
+            System.out.printf("%-8s", "Time");
+            for (String day : days) {
+                System.out.printf("| %-15s", day);
+            }
+            System.out.println("\n" + "-".repeat(90));
+
+            for (LocalTime time : timeSlots) {
+                System.out.printf("%-8s", time);
+                for (String day : days) {
+                    Lecture lec = table.get(day).get(time);
+                    if (lec != null) {
+                        System.out.printf("| %-15s", lec.subject);
+                    } else {
+                        System.out.printf("| %-15s", "");
+                    }
+                }
+                System.out.println();
+            }
+        }
     }
+
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -236,6 +275,10 @@ public class TimeTableManager {
                     System.out.println("👋 프로그램을 종료합니다.");
                     scanner.close();
                     return;
+            }
+
+                case 8: timeTable.printWeeklyTable();
+
                 default:
                     System.out.println("❌ 잘못된 선택입니다.");
             }
