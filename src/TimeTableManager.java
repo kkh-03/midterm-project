@@ -163,7 +163,7 @@ public class TimeTableManager {
                     if (table.containsKey(lec.day.toUpperCase())) {
                         table.get(lec.day.toUpperCase()).put(slot, lec);
                     }
-                    slot = slot.plusMinutes(30);
+                    slot = slot.plusHours(1);
                 }
             }
 
@@ -203,8 +203,8 @@ public class TimeTableManager {
             System.out.println("4. 저장하기");
             System.out.println("5. 수업 검색");
             System.out.println("6. 수업 수정");
-            System.out.println("7. 종료");
-            System.out.println("8. 주간 시간표 보기");
+            System.out.println("7. 주간 수업시간표 보기");
+            System.out.println("8. 종료");
             System.out.print("선택: ");
 
             int choice;
@@ -239,7 +239,7 @@ public class TimeTableManager {
                 case 2: {
                     System.out.print("삭제할 과목명: ");
                     String subject = scanner.nextLine();
-                    System.out.print("요일(MON, TUE, ...): ");
+                    System.out.print("요일(MON, TUE, WED, THU, FRI(앞 표기대로 입력해주세요)): ");
                     String day = scanner.nextLine().toUpperCase();
                     System.out.print("시작 시간 (HH:mm): ");
                     LocalTime start = LocalTime.parse(scanner.nextLine());
@@ -283,12 +283,12 @@ public class TimeTableManager {
                     break;
                 }
                 case 7:
+                    timeTable.printWeeklyTable();
+                    break;
+                case 8:
                     System.out.println("👋 프로그램을 종료합니다.");
                     scanner.close();
                     return;
-                case 8:
-                    timeTable.printWeeklyTable();
-                    break;
                 default:
                     System.out.println("❌ 잘못된 선택입니다.");
                     break;
