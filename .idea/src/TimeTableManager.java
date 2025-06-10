@@ -1,8 +1,6 @@
 import java.io.*;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class TimeTableManager {
 
@@ -22,7 +20,7 @@ public class TimeTableManager {
         }
 
         public boolean isOverlap(Lecture other) {
-            if (!this.day.equals(other.day)) return false;
+            if (!this.day.equalsIgnoreCase(other.day)) return false;
             return !(this.endTime.isBefore(other.startTime) || this.startTime.isAfter(other.endTime));
         }
 
@@ -60,24 +58,43 @@ public class TimeTableManager {
 
         public void printLectures() {
             if (lectures.isEmpty()) {
-                System.out.println("⛔등록된 수업이 없습니다.");
+                System.out.println("⛔ 등록된 수업이 없습니다.");
                 return;
             }
-            for (Lecture l : lectures) {
-                System.out.println(l);
-            }
+
+            System.out.println("📅 정렬된 시간표:");
+            lectures.stream()
+                    .sorted((a, b) -> {
+                        int dayCompare = dayOrder(a.day) - dayOrder(b.day);
+                        return dayCompare != 0 ? dayCompare : a.startTime.compareTo(b.startTime);
+                    })
+                    .forEach(System.out::println);
+        }
+
+        private int dayOrder(String day) {
+            return switch (day.toUpperCase()) {
+                case "MON" -> 1;
+                case "TUE" -> 2;
+                case "WED" -> 3;
+                case "THU" -> 4;
+                case "FRI" -> 5;
+                case "SAT" -> 6;
+                case "SUN" -> 7;
+                default -> 8;
+            };
         }
 
         public void searchLecture(String keyword) {
             boolean found = false;
+            System.out.println("🔍 검색 결과:");
             for (Lecture l : lectures) {
-                if (l.subject.toLowerCase().contains(keyword.toLowerCase())) {
+                if (l.subject.toLowerCase().contains(keyword.toLowerCase()) || l.day.equalsIgnoreCase(keyword)) {
                     System.out.println(l);
                     found = true;
                 }
             }
             if (!found) {
-                System.out.println("🔍 해당 과목을 찾을 수 없습니다.");
+                System.out.println("❌ 해당 과목을 찾을 수 없습니다.");
             }
         }
 
@@ -85,13 +102,11 @@ public class TimeTableManager {
             for (Lecture lec : lectures) {
                 if (lec.subject.equalsIgnoreCase(subject)) {
                     Lecture temp = new Lecture(lec.subject, lec.day, newStart, newEnd, newRoom);
-
                     for (Lecture other : lectures) {
                         if (!other.subject.equalsIgnoreCase(subject) && other.isOverlap(temp)) {
                             return false;
                         }
                     }
-
                     lec.startTime = newStart;
                     lec.endTime = newEnd;
                     lec.room = newRoom;
@@ -121,11 +136,64 @@ public class TimeTableManager {
                 System.out.println("❌ 불러오기 실패: " + e.getMessage());
             }
         }
+
+        public void printWeeklyTable() {
+            if (lectures.isEmpty()) {
+                System.out.println("⛔ 등록된 수업이 없습니다.");
+                return;
+            }
+
+            String[] days = {"MON", "TUE", "WED", "THU", "FRI"};
+            LocalTime earliest = lectures.stream().map(l -> l.startTime).min(LocalTime::compareTo).orElse(LocalTime.of(8, 0));
+            LocalTime latest = lectures.stream().map(l -> l.endTime).max(LocalTime::compareTo).orElse(LocalTime.of(18, 0));
+
+            List<LocalTime> timeSlots = new ArrayList<>();
+            for (LocalTime time = earliest; !time.isAfter(latest); time = time.plusMinutes(30)) {
+                timeSlots.add(time);
+            }
+
+            Map<String, Map<LocalTime, Lecture>> table = new HashMap<>();
+            for (String day : days) {
+                table.put(day, new HashMap<>());
+            }
+
+            for (Lecture lec : lectures) {
+                LocalTime slot = lec.startTime;
+                while (!slot.isAfter(lec.endTime.minusMinutes(1))) {
+                    if (table.containsKey(lec.day.toUpperCase())) {
+                        table.get(lec.day.toUpperCase()).put(slot, lec);
+                    }
+                    slot = slot.plusHours(1);
+                }
+            }
+
+            System.out.printf("%-8s", "Time");
+            for (String day : days) {
+                System.out.printf("| %-15s", day);
+            }
+            System.out.println("\n" + "-".repeat(100));
+
+            for (LocalTime time : timeSlots) {
+                System.out.printf("%-8s", time);
+                for (String day : days) {
+                    Lecture lec = table.get(day).get(time);
+                    if (lec != null && lec.startTime.equals(time)) {
+                        System.out.printf("| %-15s", lec.subject);
+                    } else if (lec != null) {
+                        System.out.printf("| %-15s", "↑");
+                    } else {
+                        System.out.printf("| %-15s", "");
+                    }
+                }
+                System.out.println();
+            }
+        }
     }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         TimeTable timeTable = new TimeTable();
+        timeTable.loadFromFile("timetable.dat");
 
         while (true) {
             System.out.println("\n--- 시간표 관리 프로그램 ---");
@@ -135,9 +203,11 @@ public class TimeTableManager {
             System.out.println("4. 저장하기");
             System.out.println("5. 수업 검색");
             System.out.println("6. 수업 수정");
-            System.out.println("7. 종료");
+            System.out.println("7. 주간 수업시간표 보기");
+            System.out.println("8. 종료");
             System.out.print("선택: ");
-            int choice = -1;
+
+            int choice;
             try {
                 choice = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
@@ -155,6 +225,11 @@ public class TimeTableManager {
                     LocalTime start = LocalTime.parse(scanner.nextLine());
                     System.out.print("종료 시간 (HH:mm): ");
                     LocalTime end = LocalTime.parse(scanner.nextLine());
+
+                    if (!start.isBefore(end)) {
+                        System.out.println("❌ 시작 시간은 종료 시간보다 이전이어야 합니다.");
+                        break;
+                    }
                     System.out.print("강의실: ");
                     String room = scanner.nextLine();
 
@@ -169,7 +244,7 @@ public class TimeTableManager {
                 case 2: {
                     System.out.print("삭제할 과목명: ");
                     String subject = scanner.nextLine();
-                    System.out.print("요일(MON, TUE, ...): ");
+                    System.out.print("요일(MON, TUE, WED, THU, FRI(앞 표기대로 입력해주세요)): ");
                     String day = scanner.nextLine().toUpperCase();
                     System.out.print("시작 시간 (HH:mm): ");
                     LocalTime start = LocalTime.parse(scanner.nextLine());
@@ -190,7 +265,7 @@ public class TimeTableManager {
                     timeTable.saveToFile("timetable.dat");
                     break;
                 case 5: {
-                    System.out.print("검색할 과목명 키워드: ");
+                    System.out.print("과목명 또는 요일 검색어 입력: ");
                     String keyword = scanner.nextLine();
                     timeTable.searchLecture(keyword);
                     break;
@@ -202,6 +277,10 @@ public class TimeTableManager {
                     LocalTime newStart = LocalTime.parse(scanner.nextLine());
                     System.out.print("새 종료 시간 (HH:mm): ");
                     LocalTime newEnd = LocalTime.parse(scanner.nextLine());
+                    if (!newStart.isBefore(newEnd)) {
+                        System.out.println("❌ 시작 시간은 종료 시간보다 이전이어야 합니다.");
+                        break;
+                    }
                     System.out.print("새 강의실: ");
                     String newRoom = scanner.nextLine();
 
@@ -213,11 +292,15 @@ public class TimeTableManager {
                     break;
                 }
                 case 7:
+                    timeTable.printWeeklyTable();
+                    break;
+                case 8:
                     System.out.println("👋 프로그램을 종료합니다.");
                     scanner.close();
                     return;
                 default:
                     System.out.println("❌ 잘못된 선택입니다.");
+                    break;
             }
         }
     }

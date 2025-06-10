@@ -225,6 +225,11 @@ public class TimeTableManager {
                     LocalTime start = LocalTime.parse(scanner.nextLine());
                     System.out.print("종료 시간 (HH:mm): ");
                     LocalTime end = LocalTime.parse(scanner.nextLine());
+
+                    if (!start.isBefore(end)) {
+                        System.out.println("❌ 시작 시간은 종료 시간보다 이전이어야 합니다.");
+                        break;
+                    }
                     System.out.print("강의실: ");
                     String room = scanner.nextLine();
 
@@ -272,6 +277,10 @@ public class TimeTableManager {
                     LocalTime newStart = LocalTime.parse(scanner.nextLine());
                     System.out.print("새 종료 시간 (HH:mm): ");
                     LocalTime newEnd = LocalTime.parse(scanner.nextLine());
+                    if (!newStart.isBefore(newEnd)) {
+                        System.out.println("❌ 시작 시간은 종료 시간보다 이전이어야 합니다.");
+                        break;
+                    }
                     System.out.print("새 강의실: ");
                     String newRoom = scanner.nextLine();
 
