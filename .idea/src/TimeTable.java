@@ -18,7 +18,7 @@ public class TimeTable {
         return true;
     }
 
-    public boolean removeLecture(String subject, String day, LocalTime startTime, LocalTime endTime) {
+    public boolean removeLectureByDetails(String subject, String day, LocalTime startTime, LocalTime endTime) {
         return lectures.removeIf(l ->
                 l.getSubject().equalsIgnoreCase(subject) &&
                         l.getDay().equalsIgnoreCase(day) &&
@@ -27,7 +27,7 @@ public class TimeTable {
         );
     }
 
-    public boolean editLecture(String subject, LocalTime newStart, LocalTime newEnd, String newRoom) {
+    public boolean editLectureBySubject(String subject, LocalTime newStart, LocalTime newEnd, String newRoom) {
         for (Lecture lec : lectures) {
             if (lec.getSubject().equalsIgnoreCase(subject)) {
                 Lecture temp = new Lecture(subject, lec.getDay(), newStart, newEnd, newRoom);
@@ -45,7 +45,7 @@ public class TimeTable {
         return false;
     }
 
-    public void searchLecture(String keyword) {
+    public void searchLectures(String keyword) {
         boolean found = false;
         System.out.println("🔍 검색 결과:");
         for (Lecture l : lectures) {
@@ -60,7 +60,7 @@ public class TimeTable {
         }
     }
 
-    public void printLectures() {
+    public void printAllLectures() {
         if (lectures.isEmpty()) {
             System.out.println("⛔ 등록된 수업이 없습니다.");
             return;
