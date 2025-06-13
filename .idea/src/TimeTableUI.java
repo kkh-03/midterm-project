@@ -51,8 +51,8 @@ public class TimeTableUI {
 
     // 수업 추가
     private void addLecture() {
-        String subject = input("과목명: ").toUpperCase();
-        String day = input("요일(MON~FRI): ").toUpperCase();
+        String subject = inputString("과목명: ").toUpperCase();
+        String day = inputString("요일(MON~FRI): ").toUpperCase();
         LocalTime start = inputTime("시작 시간 (HH:mm): ");
         LocalTime end = inputTime("종료 시간 (HH:mm): ");
 
@@ -61,7 +61,7 @@ public class TimeTableUI {
             return;
         }
 
-        String room = input("강의실: ");
+        String room = inputString("강의실: ");
         if (timeTable.addLecture(new Lecture(subject, day, start, end, room))) {
             System.out.println("✅ 수업 추가 완료");
         } else {
@@ -71,8 +71,8 @@ public class TimeTableUI {
 
     // 수업 삭제
     private void deleteLecture() {
-        String subject = input("삭제할 과목명: ").toUpperCase();
-        String day = input("요일: ").toUpperCase();
+        String subject = inputString("삭제할 과목명: ").toUpperCase();
+        String day = inputString("요일: ").toUpperCase();
         LocalTime start = inputTime("시작 시간 (HH:mm): ");
         LocalTime end = inputTime("종료 시간 (HH:mm): ");
 
@@ -85,7 +85,7 @@ public class TimeTableUI {
 
     // 수업 수정
     private void editLecture() {
-        String subject = input("수정할 과목명: ");
+        String subject = inputString("수정할 과목명: ");
         LocalTime start = inputTime("새 시작 시간: ");
         LocalTime end = inputTime("새 종료 시간: ");
 
@@ -94,7 +94,7 @@ public class TimeTableUI {
             return;
         }
 
-        String room = input("새 강의실: ");
+        String room = inputString("새 강의실: ");
         if (timeTable.editLecture(subject, start, end, room)) {
             System.out.println("✏️ 수정 완료");
         } else {
@@ -103,7 +103,7 @@ public class TimeTableUI {
     }
 
     // 문자열 입력 받기
-    private String input(String msg) {
+    private String inputString(String msg) {
         System.out.print(msg);
         return scanner.nextLine();
     }
